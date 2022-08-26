@@ -1,0 +1,853 @@
+---
+title: "Protótipo DRG - Cardiologia"
+output: 
+  flexdashboard::flex_dashboard:
+     social: menu
+     source_code: embed    
+     vertical_layout: fill
+runtime: shiny
+---
+
+
+
+```{r packages, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(plotly)
+library(readxl)
+library(DT)
+library(knitr)
+library(kableExtra)
+```
+
+```{r data}
+data_proc <- read_xlsx("proc_diag_tabela.xlsx",sheet = "PROC")
+data_diag <- read_xlsx("proc_diag_tabela.xlsx",sheet = "DIAG")
+data_name_DRG <- read_xlsx("proc_diag_tabela.xlsx",sheet = "NOME")
+data_name_DRG$DRG <- factor(data_name_DRG$DRG)
+
+################## Diagnósticos #################################
+DGCAT09M01 <- data_diag %>% filter(value =="09M01") %>% select(code_diag )
+DGCAT09M02 <- data_diag %>% filter(value =="09M02") %>% select(code_diag )
+DGCAT09M03 <- data_diag %>% filter(value =="09M03") %>% select(code_diag )
+DGCAT09M04 <- data_diag %>% filter(value =="09M04") %>% select(code_diag )
+DGCAT09M05 <- data_diag %>% filter(value =="09M05") %>% select(code_diag )
+DGCAT09M06 <- data_diag %>% filter(value =="09M06") %>% select(code_diag )
+DGCAT09M07 <- data_diag %>% filter(value =="09M07") %>% select(code_diag )
+DGCAT09M08 <- data_diag %>% filter(value =="09M08") %>% select(code_diag )
+DGCAT09M09 <- data_diag %>% filter(value =="09M09") %>% select(code_diag )
+DGCAT09M10 <- data_diag %>% filter(value =="09M10") %>% select(code_diag )
+
+
+DGPROP09X03 <- data_diag %>% filter(value =="09X03") %>% select(code_diag )
+DGPROP09X04 <- data_diag %>% filter(value =="09X04") %>% select(code_diag )
+DGPROP09X05 <- data_diag %>% filter(value =="09X05") %>% select(code_diag )
+DGPROP09X06 <- data_diag %>% filter(value =="09X06") %>% select(code_diag )
+DGPROP09X07 <- data_diag %>% filter(value =="09X07") %>% select(code_diag )
+
+DGPROP09X11 <- data_diag %>% filter(value =="09X11") %>% select(code_diag )
+
+
+
+################## Procedimentos #################################
+PROC09S01 <- data_proc %>% filter(value =="09S01") %>% select(code_proc )
+PROC09S03 <- data_proc %>% filter(value =="09S03") %>% select(code_proc )
+PROC09S04 <- data_proc %>% filter(value =="09S04") %>% select(code_proc )
+PROC09S05 <- data_proc %>% filter(value =="09S05") %>% select(code_proc )
+PROC09S06 <- data_proc %>% filter(value =="09S06") %>% select(code_proc )
+
+PROC09S10 <- data_proc %>% filter(value =="09S10") %>% select(code_proc )
+
+PROC09S12 <- data_proc %>% filter(value =="09S12") %>% select(code_proc )
+
+PROC09S14 <- data_proc %>% filter(value =="09S14") %>% select(code_proc )
+PROC09S15 <- data_proc %>% filter(value =="09S15") %>% select(code_proc )
+PROC09S16 <- data_proc %>% filter(value =="09S16") %>% select(code_proc )#N?o tem
+PROC09S17 <- data_proc %>% filter(value =="09S17") %>% select(code_proc )#N?o tem
+PROC09S18 <- data_proc %>% filter(value =="09S18") %>% select(code_proc )
+PROC09S19 <- data_proc %>% filter(value =="09S19") %>% select(code_proc )
+PROC09S20 <- data_proc %>% filter(value =="09S20") %>% select(code_proc )
+PROC09S21 <- data_proc %>% filter(value =="09S21") %>% select(code_proc )#N?o tem
+PROC09S22 <- data_proc %>% filter(value =="09S22") %>% select(code_proc )
+PROC09S23 <- data_proc %>% filter(value =="09S23") %>% select(code_proc )
+PROC09S24 <- data_proc %>% filter(value =="09S24") %>% select(code_proc )
+PROC09S25 <- data_proc %>% filter(value =="09S25") %>% select(code_proc )
+PROC09S26 <- data_proc %>% filter(value =="09S26") %>% select(code_proc )
+PROC09S27 <- data_proc %>% filter(value =="09S27") %>% select(code_proc )
+
+PROC09S59 <- data_proc %>% filter(value =="09S59") %>% select(code_proc )
+PROC09S60 <- data_proc %>% filter(value =="09S60") %>% select(code_proc )
+PROC09S61 <- data_proc %>% filter(value =="09S61") %>% select(code_proc )
+```
+
+
+
+Descritivo
+=====================================  
+
+
+Column 
+-----------------------------------------------------------------------
+
+### Aplicativo
+
+Antes de seguir para a aba ***DRG*** aqui são apresentados os passos de como utilizar o aplicativo para realizar os testes com os grupos DRG da especialidade de Cardiologia.
+
+ -  **Primeiro Passo:** Os dados para testes precisam estar em formato ***xlsx*** extensão do excel. Neste arquivo deve conter pelo menos as seguintes variáveis para que a lógica funcione:\
+***DGCAT:*** representa o diagnóstico principal;\
+***MDC:*** capítulo da CID da especialidade ortopedia;\
+***PROCPRO1:*** procedimento principal;\
+***SECPROC1*** procedimento secundário; \
+***SECPROC2:*** mais um procedimento secundário;\
+***DGPRP1:*** diagnóstico secundário;\
+***IDADE:*** idade do contato assistencial.\
+
+-  **Segundo Passo:** Acesse a aba ***DRG*** na subaba **Entrada**, *click* no botão ***SELECIONE O ARQUIVO*** busque pelo arquivo desejado. Em seguida *click* no botão ***APRESENTAR OS DADOS***. 
+
+-  **Terceiro Passo:** Após o Segundo Passo acesse a subaba **Saída**, *click* no botão ***INICIAR AGRUPADOR***, o resultado é uma tabela com os contatos assistênciais agrupados em seus respectivos grupos DRGs. Esta tabela salva via download nas extensões ***.CSV*** e ***Excel***, bastando clicar no botão da extensão desejada.
+
+Na aba ***Quantitativo DRG***, é possível ter o quantitativo dos grupos DRGs via gráfico e tabela, acessando as subabas de interesse.
+
+
+
+Column 
+-----------------------------------------------------------------------
+
+### DRG  e Especialidade de Ortopedia
+
+O DRG é uma metodologia genérica que classifica os registros dos pacientes em grupos com características clínicas semelhantes e perfis de consumo semelhantes. 
+
+Não há um sistema DRG universal, mas vários sistemas DRG com algoritmos variados para agrupar pacientes, dependendo da configuração clínica e administrativa para a qual eles são projetados. 
+
+A metodologia usada para criar esses algoritmos de agrupamento de registros de pacientes é praticamente a mesma, e é por isso que podemos referir o DRG como uma metodologia genérica.
+
+
+Ortopedia...
+
+
+
+
+DRG 
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------
+
+
+### **Entrada**
+
+
+```{r}
+fileInput("file1", "SELECIONE OS DADOS .xlsx", accept = ".xlsx",
+  buttonLabel = "SELECIONE O ARQUIVO")
+actionButton("run_button","APRESENTAR OS DADOS", icon = icon("play"), style = "width:250px",
+             class = "btn-danger")
+```
+
+```{r entrada}
+dataset <- eventReactive(input$file1, {
+     file <- input$file1
+     if(is.null(file)){return()} 
+     ext <- tools::file_ext(file$datapath)
+     req(file)
+     validate(need(ext == "xlsx", "Please upload a xlsx file"))
+     read_xlsx(file$datapath)
+    })
+
+
+
+table_data <- eventReactive(input$run_button, {
+  x = dataset()
+ as.data.frame(x)
+})
+
+renderDataTable({
+  req(table_data())
+table_data() %>% 
+  DT::datatable(options = list(pageLength = 10), rownames = FALSE)
+})
+```
+
+
+### **Saída**
+
+
+
+```{r botao2}
+actionButton("run_agrupar","INICIAR AGRUPADOR", icon = icon("play"), style = "width:250px",
+             class="btn-success")
+```
+
+
+
+```{r logica}
+
+table_out <- eventReactive(input$run_agrupar, {
+ 
+req(table_data())
+data1_ <- table_data()
+
+
+
+DRG <- NULL
+#eventReactive({
+  DRG <- NULL
+  #eventReactive({
+  for(i in 1:length(data1_$IDADE)){
+    
+    #REGRA 1 est? no final do c?digo
+    
+    # REGRA 2
+    if( (data1_$MDC[i] == "09") & 
+        (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) &
+        (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+        (data1_$DGPROP1[i] %in% DGPROP09X06$code_diag ) ) {
+      DRG[i] <- "0901"
+    }
+    # REGRA 3
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S03$code_proc ) ) {
+      DRG[i] <- "0901"
+    }
+    # REGRA 4 # rever x2
+    else if( (data1_$MDC[i] == "09") &
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S01$code_proc )& 
+             (data1_$SECPROC11[i] %in% PROC09S01$code_proc ) ) {
+      DRG[i] <- "0901"
+    }
+    # REGRA 5
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S01$code_proc ) ) {
+      DRG[i] <- "0902"
+    }  
+    # REGRA 6
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) ) {
+      DRG[i] <- "0903"
+    }
+    # REGRA 7
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S06$code_proc) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X06$code_diag) ) {
+      DRG[i] <- "0904"
+    }
+    # REGRA 8
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S06$code_proc) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X07$code_diag) ) {
+      DRG[i] <- "0904"
+    }
+    # REGRA 9
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S06$code_proc) ) {
+      DRG[i] <- "0904"
+    }
+    # REGRA 10
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag)  & 
+             (data1_$DGPROP1[i] %in% DGPROP09X07$code_diag) ) {
+      DRG[i] <- "0905"
+    }
+    # REGRA 11
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S10$code_proc) ) {
+      DRG[i] <- "0905"
+    }
+    # REGRA 12
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M01$code_diag) ) {
+      DRG[i] <- "0905"
+    }
+    # REGRA 13
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X06$code_diag ) ) {
+      DRG[i] <- "0906"
+    }
+    # REGRA 14
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S03$code_proc ) ) {
+      DRG[i] <- "0906"
+    }
+    # REGRA 15
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S01$code_proc ) ) {
+      DRG[i] <- "0907"
+    }
+    # REGRA 16
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) ) {
+      DRG[i] <- "0909"
+    }
+    # REGRA 17 
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X07$code_diag) ) {
+      DRG[i] <- "0908"
+    }
+    # REGRA 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S10$code_proc) ) {
+      DRG[i] <- "0908"
+    }
+    # REGRA 19
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S04$code_proc) ) {
+      DRG[i] <- "0910"
+    }
+    # REGRA 20
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M02$code_diag) ) {
+      DRG[i] <- "0911"
+    }
+    # REGRA 21
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X06$code_diag ) ) {
+      DRG[i] <- "0912"
+    }
+    # REGRA 22
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S03$code_proc ) ) {
+      DRG[i] <- "0912"
+    }
+    # REGRA 23
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) & 
+             (data1_$SECPROC1[i] %in% PROC09S01$code_proc ) ) {
+      DRG[i] <- "0913"
+    }
+    # REGRA 24
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S05$code_proc) ) {
+      DRG[i] <- "0914"
+    }
+    # REGRA 25
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X07$code_diag) ) {
+      DRG[i] <- "0956"
+    }
+    # REGRA 26
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S10$code_proc) ) {
+      DRG[i] <- "0956"
+    }
+    # REGRA 27
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S04$code_proc) ) {
+      DRG[i] <- "0916"
+    }
+    # REGRA 28
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M03$code_diag) ) {
+      DRG[i] <- "0915"
+    } 
+    # REGRA 29
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X03$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S12$code_proc) ) {
+      DRG[i] <- "0917"
+    } 
+    # REGRA 30 rever x 2
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X03$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S14$code_proc) & 
+             (data1_$SECPROC11[i] %in% PROC09S14$code_proc)) {
+      DRG[i] <- "0917"
+    } 
+    # REGRA 31
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X03$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S14$code_proc) ) {
+      DRG[i] <- "0918"
+    } 
+    # REGRA 32
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X03$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S15$code_proc) ) {
+      DRG[i] <- "0919"
+    } 
+    # REGRA 33
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X03$code_diag) ) {
+      DRG[i] <- "0920"
+    } 
+    # REGRA 34
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X04$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S16$code_proc) & 
+             (data1_$DGPROP2[i] %in% DGPROP09X05$code_diag) ) {
+      DRG[i] <- "0922"
+    } 
+    # REGRA 35
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X04$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S12$code_proc) ) {
+      DRG[i] <- "0923"
+    } 
+    # REGRA 36 rever x2
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X04$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S14$code_proc)  & 
+             (data1_$SECPROC11[i] %in% PROC09S14$code_proc)) {
+      DRG[i] <- "0923"
+    } 
+    # REGRA 37
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X04$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S14$code_proc)  ) {
+      DRG[i] <- "0924"
+    } 
+    # REGRA 38
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X04$code_diag) & 
+             (data1_$SECPROC1[i] %in% PROC09S15$code_proc) ) {
+      DRG[i] <- "0925"
+    } 
+    # REGRA 39
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag) & 
+             (data1_$DGPROP1[i] %in% DGPROP09X04$code_diag) ) {
+      DRG[i] <- "0926"
+    } 
+    # REGRA 40
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M04$code_diag)) {
+      DRG[i] <- "0927"
+    } 
+    # REGRA 41
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M05$code_diag)) {
+      DRG[i] <- "0928"
+    } 
+    # REGRA 42
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M05$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S17$code_proc) ) {
+      DRG[i] <- "0928"
+    } 
+    # REGRA 43 rever x2
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M05$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S18$code_proc) & 
+             (data1_$PROCPRO11[i] %in% PROC09S18$code_proc)) {
+      DRG[i] <- "0928"
+    } 
+    # REGRA 44
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M05$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S18$code_proc) ) {
+      DRG[i] <- "0929"
+    } 
+    # REGRA 45
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M05$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S19$code_proc) ) {
+      DRG[i] <- "0930"
+    } 
+    #REGRA 46
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M05$code_diag) ) {
+      DRG[i] <- "0931"
+    } 
+    #REGRA 47
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M06$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S20$code_proc) & 
+             (data1_$DGPROP1 %in% DGPROP09X07$code_diag) ) {
+      DRG[i] <- "0935"
+    } 
+    #REGRA 48
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M06$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S20$code_proc) ) {
+      DRG[i] <- "0932"
+    } 
+    #REGRA 49
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M06$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S21$code_proc) ) {
+      DRG[i] <- "0933"
+    } 
+    #REGRA 50
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M06$code_diag) ) {
+      DRG[i] <- "0934"
+    } 
+    #REGRA 51 idade < 90
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S22$code_proc) &
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0936"
+    } 
+    #REGRA 52 idade < 90
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S23$code_proc) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0937"
+    } 
+    #REGRA 53 idade < 90
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S24$code_proc) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0938"
+    }   
+    #REGRA 54 idade < 90
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0939"
+    }  
+    #REGRA 55 idade < 1
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S22$code_proc) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0940"
+    }  
+    #REGRA 56 idade < 1
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S23$code_proc) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0941"
+    }  
+    #REGRA 57 idade < 1
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S24$code_proc) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0942"
+    }  
+    #REGRA 58 idade < 1
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag) & 
+             data1_$IDADE[i] < 1 ) {
+      DRG[i] <- "0947"
+    }    
+    #REGRA 59 idade < 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S22$code_proc) & 
+             data1_$IDADE[i] < 18 ) {
+      DRG[i] <- "0944"
+    }  
+    #REGRA 60 idade < 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S23$code_proc) & 
+             data1_$IDADE[i] < 18 ) {
+      DRG[i] <- "0943"
+    }    
+    #REGRA 61 idade < 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S24$code_proc) & 
+             data1_$IDADE[i] < 18 ) {
+      DRG[i] <- "0945"
+    }    
+    #REGRA 62 idade < 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag) & 
+             data1_$IDADE[i] < 18 ) {
+      DRG[i] <- "0946"
+    }    
+    #REGRA 63 idade > 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S22$code_proc) & 
+             data1_$IDADE[i] > 18 ) {
+      DRG[i] <- "0950"
+    }    
+    #REGRA 64 idade > 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S23$code_proc) & 
+             data1_$IDADE[i] > 18 ) {
+      DRG[i] <- "0949"
+    }          
+    #REGRA 65 idade > 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag)& 
+             (data1_$PROCPRO1[i] %in% PROC09S24$code_proc) & 
+             data1_$IDADE[i] > 18 ) {
+      DRG[i] <- "0948"
+    }          
+    #REGRA 66 idade > 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag) & 
+             data1_$IDADE[i] > 18 ) {
+      DRG[i] <- "0951"
+    }          
+    #REGRA 67 idade > 18
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M07$code_diag) ) {
+      DRG[i] <- "0999"
+    }    
+    #REGRA 68 
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M08$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S25$code_proc) ) {
+      DRG[i] <- "0952"
+    } 
+    #REGRA 69
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M08$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S26$code_proc)& 
+             (data1_$PROCPRO11[i] %in% PROC09S26$code_proc) ) {
+      DRG[i] <- "0952"
+    } 
+    #REGRA 70
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M08$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S26$code_proc) ) {
+      DRG[i] <- "0953"
+    } 
+    #REGRA 71
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M08$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S27$code_proc) ) {
+      DRG[i] <- "0954"
+    }       
+    #REGRA 72
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M08$code_diag) ) {
+      DRG[i] <- "0955"
+    }       
+    #REGRA 73
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M09$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S27$code_proc) ) {
+      DRG[i] <- "0961"
+    }      
+    #REGRA 74
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M09$code_diag) ) {
+      DRG[i] <- "0957"
+    }
+    #REGRA 75
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M10$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S61$code_proc) ) {
+      DRG[i] <- "0962"
+    } 
+    #REGRA 76
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M10$code_diag) & 
+             (data1_$PROCPRO1[i] %in% PROC09S27$code_proc) ) {
+      DRG[i] <- "0963"
+    } 
+    #REGRA 77
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$DGCAT[i] %in% DGCAT09M10$code_diag)) {
+      DRG[i] <- "0964"
+    } 
+    #REGRA 78
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$PROCPRO1[i] %in% PROC09S59$code_proc)) {
+      DRG[i] <- "0959"
+    }     
+    #REGRA 79
+    else if( (data1_$MDC[i] == "09") & 
+             (data1_$PROCPRO1[i] %in% PROC09S60$code_proc)) {
+      DRG[i] <- "0960"
+    }  
+    #REGRA 80
+    else if( (data1_$MDC[i] == "09")) {
+      DRG[i] <- "0999"
+    } 
+    # REGRA 47
+    else {
+      DRG[i] <- "2602"
+    }
+  }
+
+data1_$DRG <- DRG
+
+x_out = data1_
+as.data.frame(x_out)
+
+})
+```
+
+
+
+```{r saida}
+renderDataTable({
+  req(table_out())
+table_out() %>% datatable(extensions = "Buttons", options = list(dom = 'Blfrtip',
+    buttons = c('csv', 'excel'), lengthMenu = list(c(10,25,50,-1),c(10, 25, 50, "All")),rownames = FALSE), filter = 'top')
+})
+```
+
+
+Quantitativo DRG
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------
+
+```{r botao3}
+actionButton("run_analise","ANALISAR", icon = icon("play"), style = "width:250px", class="btn-info")
+```
+
+
+### **Gráfico**
+
+
+
+```{r plot1}
+data_analise <- eventReactive(input$run_analise,{
+  req(table_out())
+  x_analise = table_out()
+as.data.frame(x_analise)
+})
+
+plotly::renderPlotly({
+  req(data_analise())
+  plotly::ggplotly( 
+data_analise() %>% group_by(DRG) %>% summarise(n=n(),.groups = 'drop')%>% arrange(desc(n)) %>%
+  left_join(data_name_DRG,by="DRG") %>%
+  ggplot(aes(x=DRG, y=n, text=DRG_label) )+
+  geom_bar(position="dodge", stat="identity",size=1, fill="steelblue") +
+    coord_flip()+
+    labs(x = "GRUPOS DRG", y = "FREQUÊNCIA", title = "")  +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 15),axis.title.x = element_text(size = 15),
+          axis.title.y = element_text(size = 15), axis.text.y = element_text(size = 15),
+          axis.title = element_text(size=15),legend.text = element_text(size=15),legend.title = element_text(size=15)
+    ),tooltip = c("text", "n"))
+})
+```
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------
+
+
+```{r table1}
+renderDataTable({
+  req(data_analise())
+data_analise() %>%  group_by(DRG) %>% summarise(n_=n(),.groups = 'drop')%>% arrange(desc(n_)) %>% mutate(FREQ=n_) %>%
+  left_join(data_name_DRG,by="DRG") %>% select(DRG,FREQ,DRG_label) %>% datatable(extensions = "Buttons", options = list(dom = 'Blfrtip',
+    buttons = c('csv', 'excel'), lengthMenu = list(c(15,25,50,-1),c(15, 25, 50, "All")),rownames = FALSE), filter = 'top')
+})
+```
+
+
+
+Análises com outras variáveis
+=====================================  
+
+
+Inputs {.sidebar data-width=250}
+-----------------------------------------------------------------------
+
+
+```{r input1,echo = FALSE,warning=FALSE}
+DRG_ <- data_name_DRG %>% select(DRG_label_junto) %>% unique()
+
+selectInput('input_DRG', 'ESCOLHA O GRUPO DRG',DRG_$DRG_label_junto)
+```
+
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------
+
+### **Gráfico 1**
+
+```{r botao4}
+#actionButton("run_analise_vari","ANALISAR", icon = icon("play"), style = "width:250px", class="btn-info")
+```
+
+
+
+
+
+```{r plot2}
+
+
+plotly::renderPlotly({
+ req(data_analise())
+ plotly::ggplotly( 
+data_analise() %>% mutate(SEXO=factor(SEXO),DRG=factor(DRG)) %>% group_by(SEXO,DRG) %>% summarise(n_=n(),.groups = 'drop')%>% arrange(desc(n_)) %>% left_join(data_name_DRG,by="DRG") %>% filter(DRG_label_junto==input$input_DRG)%>%
+ ggplot(aes(x=SEXO, y=n_, text=SEXO) )+
+ geom_bar(position="dodge", stat="identity",size=1, fill="orange") +
+    coord_flip()+
+    labs(x = "SEXO", y = "FREQUÊNCIA", title = "")  +
+    theme_bw() +
+   theme(axis.text.x = element_text(size = 15),axis.title.x = element_text(size = 15),
+         axis.title.y = element_text(size = 15), axis.text.y = element_text(size = 15),
+          axis.title = element_text(size=15),legend.text = element_text(size=15),legend.title = element_text(size=15)
+    ),tooltip = c("text", "n_"))
+})
+
+```
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------
+
+### **Gráfico 2**
+
+```{r table2}
+plotly::renderPlotly({
+ req(data_analise())
+  data_Custo <- data_analise()
+  data_Custo$Custo <- runif(110,150,3000)
+ plotly::ggplotly( 
+data_Custo %>% mutate(SEXO=factor(SEXO),DRG=factor(DRG)) %>%  left_join(data_name_DRG,by="DRG") %>% filter(DRG_label_junto==input$input_DRG)%>%
+  ggplot(aes(x=Custo) )+
+  geom_histogram(fill="aquamarine1",bins=30) +
+  labs(x = "Custo", y = "FREQUÊNCIA", title = "")  +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 15),axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15), axis.text.y = element_text(size = 15),
+        axis.title = element_text(size=15),legend.text = element_text(size=15),legend.title = element_text(size=15)
+  ))
+})
+```
