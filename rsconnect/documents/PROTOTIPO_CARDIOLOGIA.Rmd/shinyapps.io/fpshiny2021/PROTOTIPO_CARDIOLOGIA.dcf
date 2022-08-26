@@ -1,0 +1,13 @@
+name: PROTOTIPO_CARDIOLOGIA
+title: PROTOTIPO_CARDIOLOGIA
+username:
+account: fpshiny2021
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6857323
+bundleId: 6241753
+url: https://fpshiny2021.shinyapps.io/PROTOTIPO_CARDIOLOGIA/
+when: 1661539053.05795
+lastSyncTime: 1661539053.05795
+asMultiple: FALSE
+asStatic: FALSE

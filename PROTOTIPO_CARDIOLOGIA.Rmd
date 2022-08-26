@@ -838,7 +838,7 @@ Column {.tabset .tabset-fade}
 plotly::renderPlotly({
  req(data_analise())
   data_Custo <- data_analise()
-  data_Custo$Custo <- runif(110,150,3000)
+  data_Custo$Custo <- runif(length((data_Custo[,1])),150,3000)
  plotly::ggplotly( 
 data_Custo %>% mutate(SEXO=factor(SEXO),DRG=factor(DRG)) %>%  left_join(data_name_DRG,by="DRG") %>% filter(DRG_label_junto==input$input_DRG)%>%
   ggplot(aes(x=Custo) )+
